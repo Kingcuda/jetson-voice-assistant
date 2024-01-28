@@ -37,6 +37,7 @@ HAS_YAHBOOM_CASE = os.environ.get("HAS_YAHBOOM_CASE", default="false").lower() =
 MAX_FRAMES = 500
 SYSTEM_MESSAGE = "You are MistralOrca, a large language model trained by Alignment Lab AI. Reply in a way as if you are in a voice conversation with a human. Make your answers short and concise."
 
+
 # Get device
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(device)
@@ -205,6 +206,8 @@ def interact(llm: Llama, messages):
     wait_for_vocalization()
     
     print(f"vocalization finished")
+    audio_as_np_int16, sample_rate = get_sound_as_np("chime.wav")
+    sound_queue.put([audio_as_np_int16, sample_rate])
 
 def vocalizaton_worker(vocalization_queue: mp.Queue, sound_queue: mp.Queue):
     tts = VOCALIZER_CLASS()
@@ -579,5 +582,4 @@ if __name__ == '__main__':
     while True:
         noise_data = wait_for_wakeword(bot, audio_device, pyaudio_device_index)
         sound_queue.put([audio_as_np_int16, sample_rate])
-
         start_speech_recognizer(ws_m, llm, bot, audio_device, pyaudio_device_index, noise_data)
